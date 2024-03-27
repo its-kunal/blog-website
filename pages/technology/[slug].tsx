@@ -19,6 +19,8 @@ import {
 import { CMS_NAME } from "../../lib/constants";
 import PrismLoader from "../../components/prism-loader";
 import ContainerSlug from "../../components/containerSlug";
+import { useState } from "react";
+
 const postBody = ({ content, post }) => {
   // Define the regular expression pattern to match the entire URL structure
   const urlPattern = /https:\/\/keploy\.io\/wp\/author\/[^\/]+\//g;
@@ -33,6 +35,7 @@ const postBody = ({ content, post }) => {
 };
 export default function Post({ post, posts, preview }) {
   const router = useRouter();
+  const [contentRead, setContentRead] = useState<number | undefined>(0);
   const morePosts = posts?.edges;
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />;
@@ -48,7 +51,7 @@ export default function Post({ post, posts, preview }) {
       Title={post?.title}
       Description={`Blog About ${post?.title}`}
     >
-      <Header />
+      <Header contentRead={contentRead} />
       <Container>
         {router.isFallback ? (
           <PostTitle>Loading…</PostTitle>
@@ -75,6 +78,7 @@ export default function Post({ post, posts, preview }) {
         <PostBody
           content={postBody({ content: post.content, post })}
           authorName={post.ppmaAuthorName}
+          setContentRead={setContentRead}
         />
       </ContainerSlug>
       <Container>
@@ -99,7 +103,7 @@ export const getStaticProps: GetStaticProps = async ({
 }) => {
   const data = await getPostAndMorePosts(params?.slug, preview, previewData);
   const { techMoreStories } = await getMoreStoriesForSlugs();
-  
+
   return {
     props: {
       preview,

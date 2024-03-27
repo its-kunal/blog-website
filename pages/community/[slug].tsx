@@ -16,6 +16,7 @@ import { getAllPostsWithSlug, getMoreStoriesForSlugs, getPostAndMorePosts } from
 import { CMS_NAME } from "../../lib/constants";
 import PrismLoader from "../../components/prism-loader";
 import ContainerSlug from "../../components/containerSlug";
+import { useState } from "react";
 
 // Define formatAuthor function before the Post component
 
@@ -35,6 +36,7 @@ const postBody = ({ content, post }) => {
 export default function Post({ post, posts, preview }) {
   const router = useRouter();
   const morePosts = posts?.edges;
+  const [contentRead, setContentRead] = useState<number | undefined>(0);
   if (!router.isFallback && !post?.slug) {
     return <ErrorPage statusCode={404} />;
   }
@@ -48,7 +50,7 @@ export default function Post({ post, posts, preview }) {
       Title={post?.title}
       Description={`Blog About ${post?.title}`}
     >
-      <Header />
+      <Header contentRead={contentRead} />
       <Container>
         {router.isFallback ? (
           <PostTitle>Loading…</PostTitle>
@@ -71,17 +73,21 @@ export default function Post({ post, posts, preview }) {
         )}
       </Container>
       <ContainerSlug>
-      {/* PostBody component placed outside the Container */}
-      <PostBody content={postBody({ content: post.content, post })} authorName={post.ppmaAuthorName} />
+        {/* PostBody component placed outside the Container */}
+        <PostBody
+          content={postBody({ content: post.content, post })}
+          authorName={post.ppmaAuthorName}
+          setContentRead={setContentRead}
+        />
       </ContainerSlug>
       <Container>
         <article>
-      <footer>{post.tags.edges.length > 0 && <Tag tags={post.tags} />}</footer>
-      <SectionSeparator />
-      {morePosts.length > 0 && (
-        <MoreStories posts={morePosts} isCommunity={true} />
-      )}
-      </article>
+          <footer>{post.tags.edges.length > 0 && <Tag tags={post.tags} />}</footer>
+          <SectionSeparator />
+          {morePosts.length > 0 && (
+            <MoreStories posts={morePosts} isCommunity={true} />
+          )}
+        </article>
       </Container>
     </Layout>
   );

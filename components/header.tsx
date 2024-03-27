@@ -101,7 +101,7 @@ const MenuBtn = () => {
   );
 };
 
-export default function Header() {
+export default function Header({ contentRead }: { contentRead?: number }) {
   const [toggleMenu, setToggleMenu] = useState(false);
 
   const toggleMenuHandler = () => {
@@ -181,6 +181,16 @@ export default function Header() {
             </div>
           </div>
         </div>
+        {/* scroll progess bar */}
+        {contentRead !== undefined && (
+          <div className="w-full h-0.5 z-10 relative">
+            <div
+              className="h-1 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-r-full z-10 transition-all duration-500 ease-in"
+              style={{ width: `${contentRead}%` }}
+            ></div>
+            <div className="top-0 absolute w-full h-0.5 bg-gray-200 -z-10"></div>
+          </div>
+        )}
       </header>
     </div>
   );

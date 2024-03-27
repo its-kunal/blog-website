@@ -1,13 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
 import TOC from "./TableContents"; // Importing TOC component
 import { IoCopyOutline, IoCheckmarkOutline } from "react-icons/io5"; // Importing icons
 import styles from "./post-body.module.css";
 import AuthorDescription from "./author-description";
-export default function PostBody({ content, authorName }) {
+export default function PostBody({
+  content,
+  authorName,
+  setContentRead,
+}: {
+  content: any;
+  authorName: any;
+  setContentRead: Dispatch<SetStateAction<number>>;
+}) {
   const [tocItems, setTocItems] = useState([]);
   const [copySuccessList, setCopySuccessList] = useState([]);
   const [isSmallScreen, setIsSmallScreen] = useState(false);
   const [replacedContent, setReplacedContent] = useState(content); // State to hold replaced content
+  const contentRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const headings = Array.from(document.querySelectorAll("h1, h2, h3, h4"));
@@ -50,10 +59,28 @@ export default function PostBody({ content, authorName }) {
 
     checkScreenSize(); // Initial check
     window.addEventListener("resize", checkScreenSize);
+
+    // progress bar percentage
+    if (contentRef && contentRef.current != null) {
+      let initialTop = contentRef.current.getBoundingClientRect().top;
+      let containerHeight = contentRef.current.getBoundingClientRect().height;
+      window.addEventListener("scroll", () => {
+        if (contentRef.current) {
+          let ob = contentRef.current.getBoundingClientRect();
+          let a = initialTop - ob.y;
+          let pr = (a / containerHeight) * 100;
+          if (pr > 100) pr = 100;
+          if (pr < 0) pr = 0;
+          pr = Math.round(pr);
+          setContentRead(pr);
+        }
+      });
+    }
+
     return () => {
       window.removeEventListener("resize", checkScreenSize);
     };
-  }, [replacedContent]);
+  }, [replacedContent, setContentRead]);
 
   const handleCopyClick = (code, index) => {
     navigator.clipboard
@@ -135,10 +162,8 @@ export default function PostBody({ content, authorName }) {
       });
   };
 
-
-
   return (
-    <div className="flex flex-col lg:flex-row">
+    <div className="flex flex-col lg:flex-row" ref={contentRef}>
       {/* Table of Contents */}
       <div
         className={`w-full lg:w-1/4 mr-5 top-20 ${
